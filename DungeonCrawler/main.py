@@ -8,6 +8,7 @@ from items import Item
 from world import World
 from button import Button
 import math as m
+from pytmx import load_pygame, TiledTileLayer
 
 mixer.init()
 pg.init()
@@ -17,14 +18,17 @@ pg.display.set_caption("Dungeon Crawler")
 
 #define game vars
 clock = pg.time.Clock()
-level = 1
+level = 3
 start_game = False
 pause_game = False
 start_intro = False
 screen_scroll = [0, 0]
 
 #create clock for maintaining framerate
+time_delay = 1000 
+pg.time.set_timer(c.PLAYERSTATUS , time_delay)
 
+pg.time.set_timer(c.POISONEVENT , time_delay, loops=20 )
 
 #define player movement vars
 moving_left = False
@@ -103,7 +107,7 @@ for mob in mob_types:
     for animation in animation_types:
         #reset temp list of images
         temp_list = []
-        for i in range(2):
+        for i in range(4):
             img = pg.image.load(f"DungeonCrawler/assets/images/characters/{mob}/{animation}/{i}.png").convert_alpha()
             img = scale_img(img, c.SCALE)
             temp_list.append(img)
@@ -201,6 +205,10 @@ for row in range(c.ROWS):
     world_data.append(r)
 
 #load in level data
+tmxdata = pytmx.TiledMap("DungeonCrawler/levels/area1test.tmx")
+
+
+
 with open(f"DungeonCrawler/levels/level{level}_data.csv", newline="") as csvfile:
     reader = csv.reader(csvfile, delimiter = ",")
     for x, row in enumerate(reader):
@@ -224,7 +232,6 @@ arrow_group = pg.sprite.Group()
 item_group = pg.sprite.Group()
 fireball_group = pg.sprite.Group()
 
-
 score_coin = Item(c.SCREEN_WIDTH - 115, 23, 0, coin_images, True)
 item_group.add(score_coin)
 #add items from level data
@@ -241,6 +248,14 @@ start_button = Button(c.SCREEN_WIDTH // 2 - 145, c.SCREEN_HEIGHT // 2 - 150, sta
 exit_button = Button(c.SCREEN_WIDTH // 2 - 110, c.SCREEN_HEIGHT // 2 + 50, exit_image)
 restart_button = Button(c.SCREEN_WIDTH // 2 - 175, c.SCREEN_HEIGHT // 2 - 50, restart_image)
 resume_button = Button(c.SCREEN_WIDTH // 2 - 175, c.SCREEN_HEIGHT // 2 - 150, resume_image)
+
+def changeColor(image, color):
+    colouredImage = pg.Surface(image.get_size())
+    colouredImage.fill(color)
+    
+    finalImage = image.copy()
+    finalImage.blit(colouredImage, (0, 0), special_flags = pg.BLEND_RGBA_MIN)
+    return finalImage
 
 #main game loop
 run = True
@@ -288,8 +303,10 @@ while run:
                 world.update(screen_scroll)
                 for enemy in enemy_list:
                     fireball = enemy.ai(player, world.obstacle_tiles, screen_scroll, fireball_image)
+                          
                     if fireball:
                         fireball_group.add(fireball)
+
                     if enemy.alive:
                         enemy.update()
                 
@@ -322,6 +339,8 @@ while run:
                 fireball.draw(screen)
             damage_text_group.draw(screen)
             item_group.draw(screen)
+
+           
             
             draw_info()
             score_coin.draw(screen)
@@ -331,7 +350,7 @@ while run:
                 level += 1
                 world_data = reset_level()
                 #load in level data
-                with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+                with open(f"DungeonCrawler/levels/level{level}_data.csv", newline="") as csvfile:
                     reader = csv.reader(csvfile, delimiter=",")
                     for x, row in enumerate(reader):
                         for y, tile in enumerate(row):
@@ -363,7 +382,7 @@ while run:
                         world_data = reset_level()
                         level = 1
                         #load in level data
-                        with open(f"levels/level{level}_data.csv", newline="") as csvfile:
+                        with open(f"DungeonCrawler/levels/level{level}_data.csv", newline="") as csvfile:
                             reader = csv.reader(csvfile, delimiter=",")
                             for x, row in enumerate(reader):
                                 for y, tile in enumerate(row):
@@ -384,6 +403,24 @@ while run:
     for event in pg.event.get():
         if event.type == pg.QUIT:  
             run = False
+        elif event.type == c.POISONEVENT:
+            if player.poison == True:
+                   player.health -= c.POISONDAMAGE
+                   print(player.health)
+                   heart_empty = changeColor(heart_empty, c.PURPLE)
+                   heart_half = changeColor(heart_half, c.PURPLE)
+                   heart_full = changeColor(heart_full, c.PURPLE)
+        elif event.type == c.PLAYERSTATUS:
+             if player.poison == True:
+                
+                player.poison = False
+
+        if player.poison == False:
+                   print("no poison")
+                   heart_empty = scale_img(pg.image.load("DungeonCrawler/assets/images/items/heart_empty.png").convert_alpha(), c.ITEM_SCALE)
+                   heart_half = scale_img(pg.image.load("DungeonCrawler/assets/images/items/heart_half.png").convert_alpha(), c.ITEM_SCALE)
+                   heart_full = scale_img(pg.image.load("DungeonCrawler/assets/images/items/heart_full.png").convert_alpha(), c.ITEM_SCALE)
+
         #take keyboard presses
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_a:

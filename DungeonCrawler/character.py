@@ -17,6 +17,7 @@ class Character():
         self.health = health
         self.alive = True
         self.hit = False
+        self.poison = False
         self.last_hit = pg.time.get_ticks()
         self.last_attack = pg.time.get_ticks()
         self.stunned = False
@@ -128,8 +129,10 @@ class Character():
                 if self.boss:
                     if dist < 500:
                         if pg.time.get_ticks() - self.last_attack >= fireball_cooldown:
-                            fireball = w.Fireball(fireball_image, self.rect.centerx, self.rect.centery, player.rect.centerx, player.rect.centery)
+                            fireball = w.Poisonsling(fireball_image, self.rect.centerx, self.rect.centery, player.rect.centerx, player.rect.centery)
                             self.last_attack = pg.time.get_ticks()
+                
+                
             #check if hit
             if self.hit == True:
                 self.hit = False

@@ -98,7 +98,7 @@ class Fireball(pg.sprite.Sprite):
         #calculate h and v speed based on angle
         self.dx  = m.cos(m.radians(self.angle)) * c.FIREBALL_SPEED
         self.dy = -(m.sin(m.radians(self.angle)) * c.FIREBALL_SPEED) # negative because y increases down the screen
-
+        
     def update(self, screen_scroll, player):
         #reposition based on angle
         self.rect.x += screen_scroll[0] + self.dx
@@ -113,6 +113,42 @@ class Fireball(pg.sprite.Sprite):
             player.hit = True
             player.last_hit = pg.time.get_ticks()
             player.health -= 10
+            self.kill()
+    def draw(self, surface):
+        surface.blit(self.image, ((self.rect.centerx - int(self.image.get_width()/2)), (self.rect.centery - int(self.image.get_height()/2))))
+
+
+class Poisonsling(pg.sprite.Sprite):
+    def __init__(self, image, x, y, target_x, target_y):
+        pg.sprite.Sprite.__init__(self)
+        self.original_image = image
+        x_dist = (target_x - x)
+        y_dist = -(target_y - y)
+        self.angle = (m.degrees(m.atan2(y_dist, x_dist)))
+        self.image = pg.transform.rotate(self.original_image, self.angle - 90)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        #calculate h and v speed based on angle
+        self.dx  = m.cos(m.radians(self.angle)) * c.POISONSLING_SPEED
+        self.dy = -(m.sin(m.radians(self.angle)) * c.POISONSLING_SPEED) # negative because y increases down the screen
+
+    def update(self, screen_scroll, player):
+        #reposition based on angle
+        self.rect.x += screen_scroll[0] + self.dx
+        self.rect.y += screen_scroll[1] + self.dy
+
+        #check if poison is off screen
+        if self.rect.right < 0  or self.rect.left > c.SCREEN_WIDTH or self.rect.bottom < 0 or self.rect.top > c.SCREEN_HEIGHT:
+            self.kill()
+
+        #check collision with player
+        if player.rect.colliderect(self.rect) and player.hit == False:
+            player.hit = True
+            player.last_hit = pg.time.get_ticks()
+            if pg.time.get_ticks() - player.last_hit < 5000:
+                player.poison = True
+            else:
+                player.poison = False
             self.kill()
     def draw(self, surface):
         surface.blit(self.image, ((self.rect.centerx - int(self.image.get_width()/2)), (self.rect.centery - int(self.image.get_height()/2))))
