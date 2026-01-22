@@ -30,6 +30,7 @@ class Weapon():
             arrow = Arrow(self.arrow_image, self.rect.centerx, self.rect.centery, self.angle)
             self.fired = True
             self.last_shot = pg.time.get_ticks()
+            
         #reset mouseclick
         if pg.mouse.get_pressed()[0] == False:
             self.fired = False

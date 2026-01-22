@@ -8,7 +8,6 @@ from items import Item
 from world import World
 from button import Button
 import math as m
-from pytmx import load_pygame, TiledTileLayer
 
 mixer.init()
 pg.init()
@@ -204,8 +203,6 @@ for row in range(c.ROWS):
     r = [-1] * c.COLS
     world_data.append(r)
 
-#load in level data
-tmxdata = pytmx.TiledMap("DungeonCrawler/levels/area1test.tmx")
 
 
 
@@ -406,7 +403,7 @@ while run:
         elif event.type == c.POISONEVENT:
             if player.poison == True:
                    player.health -= c.POISONDAMAGE
-                   print(player.health)
+                  # print(player.health)
                    heart_empty = changeColor(heart_empty, c.PURPLE)
                    heart_half = changeColor(heart_half, c.PURPLE)
                    heart_full = changeColor(heart_full, c.PURPLE)
@@ -416,7 +413,7 @@ while run:
                 player.poison = False
 
         if player.poison == False:
-                   print("no poison")
+                   #print("no poison")
                    heart_empty = scale_img(pg.image.load("DungeonCrawler/assets/images/items/heart_empty.png").convert_alpha(), c.ITEM_SCALE)
                    heart_half = scale_img(pg.image.load("DungeonCrawler/assets/images/items/heart_half.png").convert_alpha(), c.ITEM_SCALE)
                    heart_full = scale_img(pg.image.load("DungeonCrawler/assets/images/items/heart_full.png").convert_alpha(), c.ITEM_SCALE)
